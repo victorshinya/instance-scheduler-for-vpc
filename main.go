@@ -36,16 +36,18 @@ func Main(params map[string]interface{}) map[string]interface{} {
 			panic(err)
 		}
 	}
-	instanceID := params["instance_id"].(string)
+	instancesID := params["instance_id"].([]string)
 	actionType := params["type"].(string)
-	_, response, err := vpc.CreateInstanceAction(&vpcv1.CreateInstanceActionOptions{
-		InstanceID: &instanceID,
-		Type:       &actionType,
-	})
-	if err != nil {
-		panic(err)
+	for _, instance := range instancesID {
+		_, _, err := vpc.CreateInstanceAction(&vpcv1.CreateInstanceActionOptions{
+			InstanceID: &instance,
+			Type:       &actionType,
+		})
+		if err != nil {
+			panic(err)
+		}
 	}
 	result := make(map[string]interface{})
-	result["result"] = response.Result
+	result["status"] = 200
 	return result
 }
