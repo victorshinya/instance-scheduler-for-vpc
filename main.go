@@ -32,22 +32,23 @@ func Main(params map[string]interface{}) map[string]interface{} {
 	if vpc == nil {
 		apiKey := params["apikey"].(string)
 		vpc, err = vpcv1.NewVpcV1(&vpcv1.VpcV1Options{Authenticator: &core.IamAuthenticator{ApiKey: apiKey}})
-		if err != nil {
-			panic(err)
+	}
+	if err == nil {
+		instancesID := params["instance_id"].([]string)
+		actionType := params["type"].(string)
+		for _, instance := range instancesID {
+			_, _, err = vpc.CreateInstanceAction(&vpcv1.CreateInstanceActionOptions{
+				InstanceID: &instance,
+				Type:       &actionType,
+			})
 		}
 	}
-	instancesID := params["instance_id"].([]string)
-	actionType := params["type"].(string)
-	for _, instance := range instancesID {
-		_, _, err := vpc.CreateInstanceAction(&vpcv1.CreateInstanceActionOptions{
-			InstanceID: &instance,
-			Type:       &actionType,
-		})
-		if err != nil {
-			panic(err)
-		}
+	var errMsg string
+	if err != nil {
+		errMsg = err.Error()
 	}
 	result := make(map[string]interface{})
-	result["status"] = 200
+	result["status"] = "Done"
+	result["error"] = errMsg
 	return result
 }
